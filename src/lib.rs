@@ -127,6 +127,8 @@ pub struct Builder {
     name: Option<String>,
     // A prefix for the thread-to-be, for identification in panic messages
     prefix: Option<String>,
+    // The URL of the web worker script to use as web worker thread script
+    worker_script_url: Option<String>,
     // The size of the stack for the spawned thread in bytes
     stack_size: Option<usize>,
     // Url of the `wasm_bindgen` generated shim `.js` script to use as web worker entry point
@@ -148,6 +150,11 @@ impl Builder {
     /// Sets the prefix of the thread-to-be.
     pub fn prefix(mut self, prefix: String) -> Builder {
         self.prefix = Some(prefix);
+        self
+    }
+
+    pub fn worker_script_url(mut self, worker_script_url: String) -> Builder {
+        self.worker_script_url = Some(worker_script_url);
         self
     }
 
@@ -249,11 +256,11 @@ impl Builder {
             name,
             prefix,
             wasm_bindgen_shim_url,
+            worker_script_url,
             ..
         } = self;
 
-        // Get worker script as URL encoded blob
-        let script = get_worker_script(wasm_bindgen_shim_url);
+        let script = worker_script_url.unwrap_or(get_worker_script(wasm_bindgen_shim_url));
 
         // Todo: figure out how to set stack size
         let mut options = WorkerOptions::new();
